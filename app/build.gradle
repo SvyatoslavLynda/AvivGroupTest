@@ -26,8 +26,13 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+            buildConfigField "String", "BASE_URL", '"https://gsl-apps-technical-test.dignp.com"'
+        }
+        debug {
+            minifyEnabled false
+            buildConfigField "String", "BASE_URL", '"https://gsl-apps-technical-test.dignp.com"'
         }
     }
     compileOptions {
