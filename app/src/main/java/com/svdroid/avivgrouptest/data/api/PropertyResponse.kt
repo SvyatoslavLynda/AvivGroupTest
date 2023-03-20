@@ -1,12 +1,12 @@
 package com.svdroid.avivgrouptest.data.api
 
 data class PropertyResponse(
-    val id: Int,
+    val id: Long,
     val bedrooms: Int?,
     val rooms: Int?,
     val offerType: Int?,
-    val area: Float?,
-    val price: Float?,
+    val area: Double?,
+    val price: Double?,
     val url: String?,
     val city: String?,
     val professional: String?,

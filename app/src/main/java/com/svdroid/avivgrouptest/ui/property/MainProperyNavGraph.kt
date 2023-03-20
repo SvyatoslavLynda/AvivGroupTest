@@ -1,49 +1,55 @@
 package com.svdroid.avivgrouptest.ui.property
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material3.*
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavController
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.svdroid.avivgrouptest.R
+import androidx.navigation.navArgument
+import com.svdroid.avivgrouptest.data.ui.UIFilters
+import com.svdroid.avivgrouptest.data.ui.UIPropertyModel
 import com.svdroid.avivgrouptest.ui.main.Destinations
+import com.svdroid.avivgrouptest.ui.property.details.PropertyScreen
+import com.svdroid.avivgrouptest.ui.property.favorites.FavoritesPropertiesListScreen
+import com.svdroid.avivgrouptest.ui.property.list.PropertiesListScreen
 
-sealed class Screen(val route: String, @StringRes val titleResourceId: Int, val icon: ImageVector) {
-    object Properties : Screen(Destinations.PROPERTY_LIST_ROUTE, R.string.properties, Icons.Filled.Home)
-    object FavoriteProperties : Screen(
-        Destinations.FAVORITE_PROPERTY_LIST_ROUTE,
-        R.string.favorite_properties,
-        Icons.Filled.Favorite,
-    )
-    object Property : Screen(Destinations.PROPERTY_DETAIL_ROUTE, R.string.favorite_properties, Icons.Filled.Favorite)
+private sealed class BarItemData(val route: String, val icon: ImageVector) {
+    object Properties : BarItemData(Destinations.PROPERTY_LIST_ROUTE, Icons.Filled.Home)
+    object FavoriteProperties : BarItemData(Destinations.FAVORITE_PROPERTY_LIST_ROUTE, Icons.Filled.Favorite)
 }
 
 @Composable
 fun MainPropertyNavGraph(rootNavController: NavController) {
     val navController = rememberNavController()
+    val actions = remember(navController) { PropertiesActions(navController, rootNavController) }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route?.substringBeforeLast("/")
 
     val items = listOf(
-        Screen.Properties,
-        Screen.FavoriteProperties,
+        BarItemData.Properties,
+        BarItemData.FavoriteProperties,
     )
 
     Scaffold(
         bottomBar = {
-            NavigationBar {
-                val navBackStackEntry by navController.currentBackStackEntryAsState()
+            if (items.find { currentRoute == it.route } != null) NavigationBar {
                 val currentDestination = navBackStackEntry?.destination
                 items.forEach { screen ->
                     NavigationBarItem(
@@ -69,22 +75,39 @@ fun MainPropertyNavGraph(rootNavController: NavController) {
             }
         }
     ) { innerPadding ->
-        NavHost(navController, startDestination = Screen.Properties.route, Modifier.padding(innerPadding)) {
-            composable(Screen.Properties.route) {
-                PropertiesListScreen(
-                    rootNavController,
-                    navController,
-                    stringResource(Screen.Properties.titleResourceId)
-                )
+        NavHost(navController, startDestination = BarItemData.Properties.route, Modifier.padding(innerPadding)) {
+            composable(route = BarItemData.Properties.route) {
+                val filters = rootNavController.currentBackStackEntry?.savedStateHandle?.get<UIFilters>(Destinations.Arguments.FILTERS)
+                PropertiesListScreen(actions = actions, filters = filters)
             }
-            composable(Screen.FavoriteProperties.route) {
-                PropertiesListScreen(
-                    rootNavController,
-                    navController,
-                    stringResource(Screen.FavoriteProperties.titleResourceId)
-                )
+            composable(route = BarItemData.FavoriteProperties.route) { FavoritesPropertiesListScreen(actions = actions) }
+            composable(
+                route = Destinations.PROPERTY_DETAIL_ROUTE,
+                arguments = listOf(navArgument(Destinations.Arguments.PROPERTY_ID) {
+                    type = NavType.LongType
+                    nullable = false
+                }),
+            ) { navBackStackEntry ->
+                val propertyId =
+                    navBackStackEntry.arguments?.getLong(Destinations.Arguments.PROPERTY_ID) ?: return@composable
+                PropertyScreen(propertyId = propertyId, actions = actions)
             }
-            composable(Screen.Property.route) { PropertyScreen(navController) }
         }
+    }
+}
+
+class PropertiesActions(navController: NavHostController, rootNavController: NavController) {
+
+    val navigateToProperty: (audio: UIPropertyModel) -> Unit = { property ->
+        navController.navigate(Destinations.propertyDetails(property.id))
+    }
+
+    val navigateToFilters: (filters: UIFilters?) -> Unit = { filters ->
+        rootNavController.currentBackStackEntry?.savedStateHandle?.set(Destinations.Arguments.FILTERS, filters)
+        rootNavController.navigate(Destinations.FILTER_ROUTE)
+    }
+
+    val navigateUp: () -> Unit = {
+        navController.navigateUp()
     }
 }

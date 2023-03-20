@@ -14,7 +14,7 @@ fun Main() {
 
     AvivGroupTestTheme {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-            NavGraph(navController = navController)
+            MainNavGraph(navController = navController)
         }
     }
 }

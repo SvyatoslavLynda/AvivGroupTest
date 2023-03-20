@@ -3,4 +3,26 @@
 
     <string name="properties">Properties</string>
     <string name="favorite_properties">Favorites</string>
+    <string name="filters">Filters</string>
+    <string name="message_loading">Loading..</string>
+    <string name="formatted_message_error" formatted="true">Error: %1$s</string>
+    <string name="message_error">Something is going wrong! Try again later..</string>
+    <string name="title_empty_favorites">Collect you favorites</string>
+    <string name="message_empty_favorites">Your favorite properties will appear here</string>
+    <string name="title_empty_properties">For these filters we cannot find any records.</string>
+    <string name="message_empty_properties">Try to use another filters or reset them.</string>
+    <string name="price" formatted="true">Price (from %1$s to %2$s)</string>
+    <string name="area" formatted="true">Area (from %1$s to %2$s)</string>
+    <string name="rooms" formatted="true">Rooms (from %1$s to %2$s)</string>
+    <string name="bedrooms" formatted="true">Bedrooms (from %1$s to %2$s)</string>
+
+    <plurals name="rooms_plurals">
+        <item quantity="one">%d room</item>
+        <item quantity="other">%d rooms</item>
+    </plurals>
+
+    <plurals name="bedrooms_plurals">
+        <item quantity="one">%d bedroom</item>
+        <item quantity="other">%d bedrooms</item>
+    </plurals>
 </resources>
